@@ -179,16 +179,20 @@ class CustomPlayer:
         if len(legal_moves) == 0:
             return self.score(game, self), (-1, -1)
 
-        opt_score = float("-inf") if maximizing_player else float("inf")
-        opt_move = None
-        for move in legal_moves:
-            forecast_game = game.forecast_move(move)
-            forecast_score, _ = self.minimax(forecast_game, depth - 1, not maximizing_player)
-            if maximizing_player and forecast_score > opt_score or not maximizing_player and forecast_score < opt_score:
-                opt_score = forecast_score
-                opt_move = move
+        return self._get_minimax_opt_tuple(
+            [(self._get_minimax_tuples(game, depth, maximizing_player, move), move) for move in legal_moves],
+            maximizing_player)
 
-        return opt_score, opt_move
+    def _get_minimax_opt_tuple(self, tuples, maximizing_player):
+        if maximizing_player:
+            return max(tuples, key=lambda item:item[0])
+        else: 
+            return min(tuples, key=lambda item:item[0])
+
+    def _get_minimax_tuples(self, game, depth, maximizing_player, move):
+        forecast_game = game.forecast_move(move)
+        forecast_score, _ = self.minimax(forecast_game, depth - 1, not maximizing_player)
+        return forecast_score
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
         """Implement minimax search with alpha-beta pruning as described in the

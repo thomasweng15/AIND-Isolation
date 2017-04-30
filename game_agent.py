@@ -184,9 +184,9 @@ class CustomPlayer:
             maximizing_player)
 
     def _get_minimax_opt_tuple(self, tuples, maximizing_player):
-        if maximizing_player:
+        if maximizing_player: 
             return max(tuples, key=lambda item:item[0])
-        else: 
+        else:
             return min(tuples, key=lambda item:item[0])
 
     def _get_minimax_tuples(self, game, depth, maximizing_player, move):
@@ -235,5 +235,50 @@ class CustomPlayer:
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        if depth == 0:
+            return self.score(game, self), (-1, -1)
+
+        legal_moves = game.get_legal_moves()
+        if len(legal_moves) == 0:
+            return self.score(game, self), (-1, -1)
+
+        best_score = float("-inf")
+        best_action = None
+        for move in legal_moves:
+            forecast_game = game.forecast_move(move)
+            score = self._min_ab_value(forecast_game, depth - 1, best_score, beta)
+            if score > best_score:
+                best_score = score
+                best_action = move
+
+        return best_score, best_action
+
+    def _min_ab_value(self, game, depth, alpha, beta):
+        if depth == 0:
+            return self.score(game, self)
+
+        best_score = float("inf")
+        for move in game.get_legal_moves():
+            forecast_game = game.forecast_move(move)
+            best_score = min(best_score, self._max_ab_value(forecast_game, depth - 1, alpha, beta))
+            if best_score <= alpha:
+                return best_score
+
+            beta = min(beta, best_score)
+
+        return best_score
+
+    def _max_ab_value(self, game, depth, alpha, beta):
+        if depth == 0:
+            return self.score(game, self)
+
+        best_score = float("-inf")
+        for move in game.get_legal_moves():
+            forecast_game = game.forecast_move(move)
+            best_score = max(best_score, self._min_ab_value(forecast_game, depth - 1, alpha, beta))
+            if best_score >= beta:
+                return best_score
+
+            alpha = max(alpha, best_score)
+
+        return best_score

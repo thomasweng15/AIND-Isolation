@@ -133,7 +133,9 @@ class CustomPlayer:
             # when the timer gets close to expiring
             best_move = (-1, -1)
             if self.method == "minimax":
-                _, best_move = self.minimax(game, 1, True)
+                _, best_move = self.minimax(game, 1)
+            elif self.method == "alphabeta":
+                _, best_move = self.alphabeta(game, 1)
 
         except Timeout:
             # Handle any actions required at timeout, if necessary
